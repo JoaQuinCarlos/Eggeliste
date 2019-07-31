@@ -1,7 +1,9 @@
 from selenium import webdriver
+import time
 
 from src.eggeliste_crawler.enums.DeclearerEnum import Declearer
 from src.eggeliste_crawler.enums.SuitEnum import Suit
+from src.eggeliste_crawler.enums.TournamentTypeEnum import TournamentType
 from src.eggeliste_crawler.obj.Contract import Contract
 from src.eggeliste_crawler.obj.PairBoard import PairBoard
 from src.eggeliste_crawler.obj.PairScore import PairScore
@@ -16,8 +18,11 @@ def create_tournament(url, webdriver_path):
     host = get_host(metadata)
     boards, rounds, pairs = get_boards_rounds_pairs(metadata)
     year, month, date = get_year_month_date(metadata)
-    pair_stats = get_pair_scores(driver)
-    return Tournament(title, host, boards, rounds, pairs, year, month, date, pair_stats)
+    tournament_type = get_tournament_type(driver.find_elements_by_tag_name("tbody")[0])
+    pair_stats = get_pair_scores(driver, tournament_type)
+
+    return Tournament(url=url, type=tournament_type, title=title, host=host, boards=boards, rounds=rounds, pairs=pairs, year=year,
+                      month=month, date=date, pair_stats=pair_stats)
 
 
 def get_title(driver):
@@ -40,7 +45,16 @@ def get_year_month_date(metadata):
     return numbers[0], numbers[1], numbers[2]
 
 
-def get_pair_scores(driver):
+def get_tournament_type(table):
+    headers = table.find_elements_by_class_name("score-total")
+    headers = headers[0].find_elements_by_tag_name("th")
+    if len(headers) == 6:
+        return TournamentType.MP
+    else:
+        return TournamentType.IMP_ACROSS
+
+
+def get_pair_scores(driver, tournament_type):
     scores = []
     expandables = driver.find_elements_by_class_name("expandable")
 
@@ -51,7 +65,10 @@ def get_pair_scores(driver):
         clubs = str.split(names[1].text, " - ")
         expandable.click()
         score = float(str(numbers[0].get_attribute("innerText")).replace(",", "."))
-        percent = float(str(numbers[1].get_attribute("innerText")).replace(",", "."))
+        if tournament_type == TournamentType.MP:
+            percent = float(str(numbers[1].get_attribute("innerText")).replace(",", "."))
+        else:
+            percent = None
         if len(clubs) == 1:
             scores.append(PairScore(players[0], players[1], clubs[0], clubs[0], score, percent))
         else:
@@ -62,10 +79,13 @@ def get_pair_scores(driver):
     for pair in pair_details:
         boards = []
         board_list = pair.find_elements_by_tag_name("tr")[2:-1]
+        t1 = time.time()
         for board in board_list:
+            t2 = time.time()
             boards.append(get_board(board))
+            print("Time for board: ", time.time() - t2)
         scores[count].eggeliste = boards
-        print(count)
+        print("Time for method: ", time.time() - t1)
         count += 1
     return scores
 
@@ -75,15 +95,16 @@ def get_board(board):
     names = board.find_elements_by_class_name("name")
     numbers = board.find_elements_by_class_name("number")
 
-    # Could possibly be added later if NBF decides to make it available for selenium.
     board_number = int(board.find_elements_by_class_name("board-no")[0].get_attribute("data-boardno"))
     contract = get_contract(names[0])
+    declearer = tds[4].get_attribute("innerText")
+    score = float(str(numbers[1].get_attribute("innerText")).replace(",", "."))
+    if contract.contract_level is None:
+        return PairBoard(board_number, contract, declearer, 0, 0, None, score, Declearer.SITOUT)
     lead_level = get_card_value(names[1])
     lead_suit = get_suit(names[1])
 
-    declearer = tds[4].get_attribute("innerText")
     tricks = int(tds[5].get_attribute("innerText"))
-    score = float(str(numbers[1].get_attribute("innerText")).replace(",", "."))
     egge_enum = get_declearer(numbers[-4:])
     return PairBoard(board_number, contract, declearer, tricks, lead_level, lead_suit, score,
                      egge_enum)
@@ -101,6 +122,10 @@ def get_contract(contractElement):
     innerText = str(contractElement.get_attribute("innerText"))
     doubled = False
     redoubled = False
+    if '-' in innerText:
+        return Contract(None, None, None, None)
+    if 'Pass' in innerText:
+        return Contract(0, None, doubled, redoubled)
     if 'XX' in innerText:
         redoubled = True
         innerText = innerText[0]
@@ -122,7 +147,7 @@ def get_suit(board):
         return Suit.SPADES
     elif len(board.find_elements_by_class_name("card-n")) == 1:
         return Suit.NOTRUMP
-    return None
+    return None  # Passed out
 
 
 def get_card_value(card):
@@ -139,7 +164,7 @@ def get_card_value(card):
         return 13
     elif lead_level == 'A':
         return 14
-    return None
+    return 0  # Passed out
 
 
 def get_declearer(number_list):
@@ -156,3 +181,5 @@ def get_declearer(number_list):
         return Declearer.NEUTSPILL
     elif len(declearerStr4) > 0:
         return Declearer.SWUTSPILL
+    else:
+        return Declearer.ALLPASS
