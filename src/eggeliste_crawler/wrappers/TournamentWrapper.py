@@ -1,24 +1,23 @@
 from selenium import webdriver
-import pandas as pd
 
-from src.eggeliste_crawler.Contract import Contract
-from src.eggeliste_crawler.PairBoard import PairBoard
-from src.eggeliste_crawler.PairScore import PairScore
-from src.eggeliste_crawler.SuitEnum import Suit
-from src.eggeliste_crawler.DeclearerEnum import Declearer
+from src.eggeliste_crawler.enums.DeclearerEnum import Declearer
+from src.eggeliste_crawler.enums.SuitEnum import Suit
+from src.eggeliste_crawler.obj.Contract import Contract
+from src.eggeliste_crawler.obj.PairBoard import PairBoard
+from src.eggeliste_crawler.obj.PairScore import PairScore
+from src.eggeliste_crawler.obj.Tournament import Tournament
 
 
-class Tournament:
-
-    def __init__(self, url, webdriver_path):
-        driver = webdriver.Chrome(webdriver_path)
-        driver.get(url)
-        metadata = driver.find_elements_by_class_name("metainfo")[0]
-        self.title = get_title(driver)
-        self.host = get_host(metadata)
-        self.boards, self.rounds, self.pairs = get_boards_rounds_pairs(metadata)
-        self.year, self.month, self.date = get_year_month_date(metadata)
-        self.pair_stats = get_pair_scores(driver)
+def create_tournament(url, webdriver_path):
+    driver = webdriver.Chrome(webdriver_path)
+    driver.get(url)
+    metadata = driver.find_elements_by_class_name("metainfo")[0]
+    title = get_title(driver)
+    host = get_host(metadata)
+    boards, rounds, pairs = get_boards_rounds_pairs(metadata)
+    year, month, date = get_year_month_date(metadata)
+    pair_stats = get_pair_scores(driver)
+    return Tournament(title, host, boards, rounds, pairs, year, month, date, pair_stats)
 
 
 def get_title(driver):
