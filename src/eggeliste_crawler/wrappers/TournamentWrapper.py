@@ -21,7 +21,8 @@ def create_tournament(url, webdriver_path):
     tournament_type = get_tournament_type(driver.find_elements_by_tag_name("tbody")[0])
     pair_stats = get_pair_scores(driver, tournament_type)
 
-    return Tournament(url=url, type=tournament_type, title=title, host=host, boards=boards, rounds=rounds, pairs=pairs, year=year,
+    return Tournament(url=url, type=tournament_type, title=title, host=host, boards=boards, rounds=rounds, pairs=pairs,
+                      year=year,
                       month=month, date=date, pair_stats=pair_stats)
 
 
@@ -31,6 +32,16 @@ def get_title(driver):
 
 def get_host(metadata):
     return str(metadata.find_elements_by_tag_name("div")[2].get_attribute("innerText")).replace("Arrangør: ", "")
+
+
+def get_opponent_names(board, pair_number):
+    hovers = board.find_elements_by_class_name("hover-title")
+    if int(str(hovers[0].get_attribute("innerText"))) == pair_number:
+        x = hovers[1].get_attribute("outerHTML")
+    else:
+        x = hovers[0].get_attribute("outerHTML")
+    x = str(x).split('"')[3].split(" - ")
+    return x
 
 
 def get_boards_rounds_pairs(metadata):
@@ -77,12 +88,13 @@ def get_pair_scores(driver, tournament_type):
     pair_details = driver.find_elements_by_class_name("pairdetail")
     count = 0
     for pair in pair_details:
+        pair_number = int(str(expandables[count].find_elements_by_tag_name("td")[1].get_attribute("innerText")))
         boards = []
         board_list = pair.find_elements_by_tag_name("tr")[2:-1]
         t1 = time.time()
         for board in board_list:
             t2 = time.time()
-            boards.append(get_board(board))
+            boards.append(get_board(board, pair_number))
             print("Time for board: ", time.time() - t2)
         scores[count].eggeliste = boards
         print("Time for method: ", time.time() - t1)
@@ -90,7 +102,7 @@ def get_pair_scores(driver, tournament_type):
     return scores
 
 
-def get_board(board):
+def get_board(board, pair_number):
     tds = board.find_elements_by_tag_name("td")
     names = board.find_elements_by_class_name("name")
     numbers = board.find_elements_by_class_name("number")
@@ -100,14 +112,16 @@ def get_board(board):
     declearer = tds[4].get_attribute("innerText")
     score = float(str(numbers[1].get_attribute("innerText")).replace(",", "."))
     if contract.contract_level is None:
-        return PairBoard(board_number, contract, declearer, 0, 0, None, score, Declearer.SITOUT)
+        return PairBoard(board_number=board_number, opponents=None, contract=contract, declearer=declearer, tricks=0,
+                         lead_level=0, lead_suit=None, score=score, egge_enum=Declearer.SITOUT)
     lead_level = get_card_value(names[1])
     lead_suit = get_suit(names[1])
+    opponents = get_opponent_names(board=board, pair_number=pair_number)
 
     tricks = int(tds[5].get_attribute("innerText"))
     egge_enum = get_declearer(numbers[-4:])
-    return PairBoard(board_number, contract, declearer, tricks, lead_level, lead_suit, score,
-                     egge_enum)
+    return PairBoard(board_number=board_number, opponents=opponents, contract=contract, declearer=declearer, tricks=tricks, lead_level=lead_level, lead_suit=lead_suit, score=score,
+                     egge_enum=egge_enum)
 
 
 def get_all_scores(url, webdriver_path):

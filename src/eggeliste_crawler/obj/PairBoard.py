@@ -1,8 +1,8 @@
 class PairBoard:
 
-    def __init__(self, board_number, contract, declearer, tricks, lead_level, lead_suit, score, egge_enum):
+    def __init__(self, board_number, opponents, contract, declearer, tricks, lead_level, lead_suit, score, egge_enum):
         self.board_number = board_number
-        # self.opponents = opponents TODO: Implement
+        self.opponents = opponents
         self.contract = contract
         self.declearer = declearer
         self.tricks = tricks
