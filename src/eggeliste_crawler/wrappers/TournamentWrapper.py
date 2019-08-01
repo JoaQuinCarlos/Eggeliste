@@ -13,7 +13,11 @@ from src.eggeliste_crawler.obj.Tournament import Tournament
 def create_tournament(url, webdriver_path):
     driver = webdriver.Chrome(webdriver_path)
     driver.get(url)
-    metadata = driver.find_elements_by_class_name("metainfo")[0]
+    metadata = driver.find_elements_by_class_name("metainfo")
+    if len(metadata) == 0:
+        return Tournament(url=url, type=TournamentType.TEAM, title=None, host=None, boards=None, rounds=None, pairs=None, year=None, month=None, date=None, pair_stats=None)
+    else:
+        metadata = metadata[0]
     title = get_title(driver)
     host = get_host(metadata)
     boards, rounds, pairs = get_boards_rounds_pairs(metadata)
@@ -62,7 +66,10 @@ def get_tournament_type(table):
     if len(headers) == 6:
         return TournamentType.MP
     else:
-        return TournamentType.IMP_ACROSS
+        if "Lag" in str(headers[3].get_attribute("innerText")):
+            return TournamentType.BUTLER
+        else:
+            return TournamentType.IMP_ACROSS
 
 
 def get_pair_scores(driver, tournament_type):
@@ -114,10 +121,14 @@ def get_board(board, pair_number):
     if contract.contract_level is None:
         return PairBoard(board_number=board_number, opponents=None, contract=contract, declearer=declearer, tricks=0,
                          lead_level=0, lead_suit=None, score=score, egge_enum=Declearer.SITOUT)
-    lead_level = get_card_value(names[1])
-    lead_suit = get_suit(names[1])
-    opponents = get_opponent_names(board=board, pair_number=pair_number)
+    if len(names) == 2:
+        lead_level = get_card_value(names[1])
+        lead_suit = get_suit(names[1])
+    else:
+        lead_level = None
+        lead_suit = None
 
+    opponents = get_opponent_names(board=board, pair_number=pair_number)
     tricks = int(tds[5].get_attribute("innerText"))
     egge_enum = get_declearer(numbers[-4:])
     return PairBoard(board_number=board_number, opponents=opponents, contract=contract, declearer=declearer, tricks=tricks, lead_level=lead_level, lead_suit=lead_suit, score=score,
@@ -182,18 +193,18 @@ def get_card_value(card):
 
 
 def get_declearer(number_list):
-    declearerStr1 = str(number_list[0].get_attribute("innerText"))
-    declearerStr2 = str(number_list[1].get_attribute("innerText"))
-    declearerStr3 = str(number_list[2].get_attribute("innerText"))
-    declearerStr4 = str(number_list[3].get_attribute("innerText"))
+    declearer_str1 = str(number_list[0].get_attribute("innerText"))
+    declearer_str2 = str(number_list[1].get_attribute("innerText"))
+    declearer_str3 = str(number_list[2].get_attribute("innerText"))
+    declearer_str4 = str(number_list[3].get_attribute("innerText"))
 
-    if len(declearerStr1) > 0:
+    if len(declearer_str1) > 0:
         return Declearer.NEFORING
-    elif len(declearerStr2) > 0:
+    elif len(declearer_str2) > 0:
         return Declearer.SWFORING
-    elif len(declearerStr3) > 0:
+    elif len(declearer_str3) > 0:
         return Declearer.NEUTSPILL
-    elif len(declearerStr4) > 0:
+    elif len(declearer_str4) > 0:
         return Declearer.SWUTSPILL
     else:
         return Declearer.ALLPASS

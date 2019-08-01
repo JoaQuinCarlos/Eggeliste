@@ -4,7 +4,7 @@ from src.eggeliste_crawler.URL_supplier import get_links
 import time
 
 driver_path = "C:/Users/Joppe/Documents/chromedriver/chromedriver.exe"
-url = "http://www.bridgekrets.no/result/view/1755/2015-02-16?node=63169"
+url = "http://www.bridgekrets.no/result/view/1755/finalebronsefinalekmlag-1-1-525336575?node=63169"
 t1 = time.time()
 tour = create_tournament(url, driver_path)
 
