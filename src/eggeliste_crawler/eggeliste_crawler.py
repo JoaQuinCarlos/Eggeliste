@@ -1,16 +1,23 @@
-from src.eggeliste_crawler.obj.Tournament import Tournament
 from src.eggeliste_crawler.wrappers.TournamentWrapper import create_tournament
-from src.eggeliste_crawler.URL_supplier import get_links
+from src.eggeliste_crawler.db import persist_tournament
+from src.eggeliste_crawler.db import *
 import time
 
-driver_path = "C:/Users/Joppe/Documents/chromedriver/chromedriver.exe"
-url = "http://www.bridgekrets.no/result/view/1755/finalebronsefinalekmlag-1-1-525336575?node=63169"
+
+def save_tournament_to_db(url):
+    driver_path = "C:/Users/Joppe/Documents/chromedriver/chromedriver.exe"
+    database = "C:\\Users\Joppe\PycharmProjects\Eggeliste\src\db\db.db"
+    tour = create_tournament(url, driver_path)
+    persist_tournament(tour, database, "http://www.bridgekrets.no/Kretser/NBF-Soer-Troendelag/Klubber/Melhus-BK/Resultater")
+
 t1 = time.time()
-tour = create_tournament(url, driver_path)
+url = "http://www.bridgekrets.no/result/view/1755/2019-08-05?node=63169"
+database = "C:\\Users\Joppe\PycharmProjects\Eggeliste\src\db\db.db"
+# save_tournament_to_db(url)
+print(time.time() - t1)
 
-print(tour.type)
+# res = get_all_pair_boards(database)
+res = get_all_pair_boards_for_pairs(database, ["Joakim Sæther", "Svein Ingar Sæther"])
 
-# links = get_links("http://www.bridgekrets.no/Kretser/NBF-Soer-Troendelag/Klubber/Melhus-BK/Resultater", driver_path)
-#
-# for link in links:
-#     print(link)
+for row in res:
+    print(row)

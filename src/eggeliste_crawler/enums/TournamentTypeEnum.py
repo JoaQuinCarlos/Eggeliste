@@ -6,3 +6,5 @@ class TournamentType(Enum):
     MP = 1
     TEAM = 2
     BUTLER = 3
+    SINGLE = 4
+    HANDICAP = 5
