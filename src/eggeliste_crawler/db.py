@@ -1,11 +1,11 @@
 import sqlite3
 from sqlite3 import Error
+from src.eggeliste_crawler.enums.TournamentTypeEnum import TournamentType
 
 
 def create_connection(db_file):
     try:
         conn = sqlite3.connect(db_file)
-        print(sqlite3.version)
         return conn
     except Error as e:
         print(e)
@@ -19,17 +19,23 @@ def create_table(conn, create_table_sql):
         print(e)
 
 
-def persist_tournament(tour, database, host_url):
-    conn = create_connection(database)
+def is_persisted(conn, url):
+    c = conn.cursor()
+    c.execute("SELECT * FROM tournament WHERE url = (?)", (url,))
+    return len(c.fetchall()) > 0
+
+
+def persist_tournament(conn, tour, host_url):
     c = conn.cursor()
     c.execute("SELECT * FROM club WHERE url = (?)", (host_url,))
     clubs = c.fetchall()
     if len(clubs) == 0:
         c.execute("INSERT INTO club(name, url) VALUES (?,?)", (tour.host, host_url))
-    club_id = c.lastrowid
+        club_id = c.lastrowid
+    else:
+        club_id = clubs[0][0]
     persist_tournament_obj(tour, c, club_id)
     conn.commit()
-    conn.close()
 
 
 def persist_tournament_obj(tour, c, club_id):
@@ -39,8 +45,9 @@ def persist_tournament_obj(tour, c, club_id):
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         (club_id, tour.title, tour.url, date, tour.rounds, tour.boards, tour.pairs, tour.type.name))
     tournament_id = c.lastrowid
-    for pair_stat in tour.pair_stats:
-        persist_pair_stat(pair_stat, c, tournament_id)
+    if tour.type != TournamentType.SINGLE:
+        for pair_stat in tour.pair_stats:
+            persist_pair_stat(pair_stat, c, tournament_id)
 
 
 def persist_pair_stat(pair_stat, c, tournament_id):
@@ -64,10 +71,21 @@ def persist_pair_board(board, c, pair_stat_id):
          board.tricks, board.lead_level, board.lead_suit.name, board.score, board.egge_enum.name, pair_stat_id))
 
 
-def get_all_pair_boards(database):
-    conn = create_connection(database)
+def get_all_pair_boards(conn):
     c = conn.cursor()
     c.execute("SELECT * FROM pair_board")
+    return c.fetchall()
+
+
+def get_all_tournaments(conn):
+    c = conn.cursor()
+    c.execute("SELECT * FROM tournament")
+    return c.fetchall()
+
+
+def get_all_clubs(conn):
+    c = conn.cursor()
+    c.execute("SELECT * FROM club")
     return c.fetchall()
 
 
@@ -89,16 +107,8 @@ def main():
     sql_create_pair_score = "CREATE TABLE IF NOT EXISTS pair_score (id INTEGER PRIMARY KEY,player_name1 TEXT,player_name2 TEXT,club_name1 TEXT,club_name2 TEXT,points REAL,score REAL,tournament_id INTEGER NOT NULL,FOREIGN KEY(tournament_id) REFERENCES tournament(id))"
     sql_create_pair_board = "CREATE TABLE IF NOT EXISTS pair_board (id INTEGER PRIMARY KEY,board_number INTEGER,opponent_name1 TEXT,opponent_name2 TEXT,contract_level INTEGER,contract_suit TEXT,doubled INTEGER,redoubled INTEGER,declearer TEXT,tricks INTEGER,lead_level INTEGER,lead_suit TEXT,score REAL,egge_enum TEXT,pair_score_id INTEGER,FOREIGN KEY(pair_score_id) REFERENCES pair_score(id))"
 
-    sql_insert = ''' INSERT INTO club(id, name, url) VALUES(1, "Melhus BK", "an url")'''
     conn = create_connection(database)
-    c = conn.cursor()
-    # res = c.execute(sql_insert)
-    # conn.commit()
-    # res = c.execute("SELECT name FROM club")
-    # rows = c.fetchall()
 
-    # for row in rows:
-    #     print(row)
     create_table(conn, sql_create_club)
     create_table(conn, sql_create_tournament)
     create_table(conn, sql_create_pair_score)

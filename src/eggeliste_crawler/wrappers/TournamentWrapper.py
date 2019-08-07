@@ -61,7 +61,7 @@ def get_boards_rounds_pairs(metadata):
 
 def get_year_month_date(metadata):
     innerText = str(metadata.find_elements_by_tag_name("div")[1].get_attribute("innerText"))
-    numbers = [int(s) for s in innerText.replace(": ", "-").split("-") if s.isdigit()]
+    numbers = [int(s) for s in innerText.replace(" ", "-").split("-") if s.isdigit()]
     return numbers[0], numbers[1], numbers[2]
 
 
@@ -92,11 +92,13 @@ def get_pair_scores(driver, tournament_type):
         score = float(str(numbers[0].get_attribute("innerText")).replace(",", "."))
         if tournament_type == TournamentType.MP:
             percent = float(str(numbers[1].get_attribute("innerText")).replace(",", "."))
-        else:
-            percent = None
+        else:  # Team tournament
+            percent = float(-1)
         if tournament_type == TournamentType.SINGLE:
             scores.append(PairScore(players[0], players[0], clubs[0], clubs[0], score, percent))
         elif len(clubs) == 1:
+            if players[0] == '-':
+                scores.append(PairScore("SITOUT", "SITOUT", "SITOUT", "SITOUT", 0, 0))
             scores.append(PairScore(players[0], players[1], clubs[0], clubs[0], score, percent))
         else:
             scores.append(PairScore(players[0], players[1], clubs[0], clubs[1], score, percent))
@@ -111,11 +113,9 @@ def get_pair_scores(driver, tournament_type):
         board_list = pair.find_elements_by_tag_name("tr")[2:-1]
         t1 = time.time()
         for board in board_list:
-            t2 = time.time()
             boards.append(get_board(board, pair_number))
-            print("Time for board: ", time.time() - t2)
         scores[count].eggeliste = boards
-        print("Time for method: ", time.time() - t1)
+        print("Time for pair: ", time.time() - t1)
         count += 1
     return scores
 
@@ -176,7 +176,7 @@ def get_suit(board):
         return Suit.SPADES
     elif len(board.find_elements_by_class_name("card-n")) == 1:
         return Suit.NOTRUMP
-    return None  # Passed out
+    return Suit.NONE  # Passed out
 
 
 def get_card_value(card):
