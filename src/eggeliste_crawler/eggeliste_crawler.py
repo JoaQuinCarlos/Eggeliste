@@ -31,6 +31,7 @@ def print_all_clubs(conn):
     for club in clubs:
         print(club)
 
+
 database = "C:\\Users\Joppe\PycharmProjects\Eggeliste\src\db\db.db"
 conn = create_connection(database)
 
@@ -38,7 +39,7 @@ driver_path = "C:/Users/Joppe/Documents/chromedriver/chromedriver.exe"
 url = "http://www.bridgekrets.no/Kretser/NBF-Soer-Troendelag/Klubber/Melhus-BK/Resultater"
 
 print_all_tournaments(conn)
-# print_all_clubs(conn)
+print_all_clubs(conn)
 # save_all_tournaments(url, driver_path, conn)
-# save_tournament_to_db("http://www.bridgekrets.no/result/view/1755/2017-12-11?node=63169", driver_path, conn, url)
+# save_tournament_to_db("http://www.bridgekrets.no/result/view/1755/2015-06-08?node=63169", driver_path, conn, url)
 conn.close()

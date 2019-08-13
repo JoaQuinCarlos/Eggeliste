@@ -99,7 +99,8 @@ def get_pair_scores(driver, tournament_type):
         elif len(clubs) == 1:
             if players[0] == '-':
                 scores.append(PairScore("SITOUT", "SITOUT", "SITOUT", "SITOUT", 0, 0))
-            scores.append(PairScore(players[0], players[1], clubs[0], clubs[0], score, percent))
+            else:
+                scores.append(PairScore(players[0], players[1], clubs[0], clubs[0], score, percent))
         else:
             scores.append(PairScore(players[0], players[1], clubs[0], clubs[1], score, percent))
 
