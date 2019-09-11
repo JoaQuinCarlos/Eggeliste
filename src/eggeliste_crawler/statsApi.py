@@ -1,4 +1,5 @@
 import math as ma
+from db import create_connection
 
 
 def get_avg_score_for_pair(conn, name1, name2):
@@ -15,7 +16,7 @@ def get_avg_score_for_pair(conn, name1, name2):
     for r in res:
         num_boards += r[14]
         tot += r[14] * r[6]
-    print("Numbaer of boards: ", num_boards)
+    print("Number of boards: ", num_boards)
     print("Average score: ", tot / num_boards)
 
 
@@ -31,8 +32,9 @@ def get_avg_score_for_player(conn, name1):
     tot = 0
     num_boards = 0
     for r in res:
-        num_boards += r[14]
-        tot += r[14] * r[6]
+        if r[16] == 'MP':
+            num_boards += r[14]
+            tot += r[14] * r[6]
     print("Number of boards: ", num_boards)
     print("Average score: ", tot / num_boards)
 
@@ -76,6 +78,43 @@ def get_eggeliste_for_pair(conn, name1, name2):
     print("NE motspill:", (ne_mot_score / ne_mot))
     print("SW føring:", (sw_foring_score / sw_foring))
     print("SW motspill:", (sw_mot_score / sw_mot))
+
+
+def get_all_pair_boards(conn):
+    c = conn.cursor()
+    c.execute("SELECT * FROM pair_board")
+    return c.fetchall()
+
+
+def get_all_tournaments(conn):
+    c = conn.cursor()
+    c.execute("SELECT * FROM tournament")
+    return c.fetchall()
+
+
+def get_all_tournaments_by_club(conn, club):
+    c = conn.cursor()
+    c.execute("SELECT * FROM tournament t "
+              "JOIN club c ON t.club_id = c.id "
+              "WHERE c.name = (?);", (club,))
+    return c.fetchall()
+
+
+def get_all_clubs(conn):
+    c = conn.cursor()
+    c.execute("SELECT * FROM club")
+    return c.fetchall()
+
+
+def get_all_pair_boards_for_pairs(database, players):
+    conn = create_connection(database)
+    c = conn.cursor()
+    c.execute("SELECT * FROM pair_board pb "
+              "JOIN pair_score ps "
+              "ON pb.pair_score_id = ps.id "
+              "WHERE ps.player_name1 IN (?, ?) "
+              "AND ps.player_name2 IN (?, ?);", (players[0], players[1], players[0], players[1]))
+    return c.fetchall()
 
 
 def score_to_percent(score, pairs):

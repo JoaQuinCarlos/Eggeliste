@@ -71,34 +71,6 @@ def persist_pair_board(board, c, pair_stat_id):
          board.tricks, board.lead_level, board.lead_suit.name, board.score, board.egge_enum.name, pair_stat_id))
 
 
-def get_all_pair_boards(conn):
-    c = conn.cursor()
-    c.execute("SELECT * FROM pair_board")
-    return c.fetchall()
-
-
-def get_all_tournaments(conn):
-    c = conn.cursor()
-    c.execute("SELECT * FROM tournament")
-    return c.fetchall()
-
-
-def get_all_clubs(conn):
-    c = conn.cursor()
-    c.execute("SELECT * FROM club")
-    return c.fetchall()
-
-
-def get_all_pair_boards_for_pairs(database, players):
-    conn = create_connection(database)
-    c = conn.cursor()
-    c.execute("SELECT * FROM pair_board pb "
-              "JOIN pair_score ps "
-              "ON pb.pair_score_id = ps.id "
-              "WHERE ps.player_name1 IN (?, ?) "
-              "AND ps.player_name2 IN (?, ?);", (players[0], players[1], players[0], players[1]))
-    return c.fetchall()
-
 
 def main():
     database = "C:\\Users\Joppe\PycharmProjects\Eggeliste\src\db\db.db"

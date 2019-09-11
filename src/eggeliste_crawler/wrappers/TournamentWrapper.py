@@ -29,6 +29,7 @@ def create_tournament(url, webdriver_path):
         handicap_button[0].click()
     tournament_type = get_tournament_type(driver.find_elements_by_tag_name("tbody")[0])
     pair_stats = get_pair_scores(driver, tournament_type)
+    driver.close()
 
     return Tournament(url=url, type=tournament_type, title=title, host=host, boards=boards, rounds=rounds, pairs=pairs,
                       year=year,
@@ -114,7 +115,8 @@ def get_pair_scores(driver, tournament_type):
         board_list = pair.find_elements_by_tag_name("tr")[2:-1]
         t1 = time.time()
         for board in board_list:
-            boards.append(get_board(board, pair_number))
+            if len(board.find_elements_by_tag_name("td")) > 1:
+                boards.append(get_board(board, pair_number))
         scores[count].eggeliste = boards
         print("Time for pair: ", time.time() - t1)
         count += 1
