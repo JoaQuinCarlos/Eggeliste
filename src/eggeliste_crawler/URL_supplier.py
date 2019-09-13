@@ -15,6 +15,8 @@ def main_urls():
         "http://bridgekrets.no/index.php/Kretser/NBF-Soer-Troendelag/Klubber/Lundamo-BK/Resultater",
         "http://www.bridgekrets.no/Kretser/NBF-Soer-Troendelag/Klubber/Berkaak-BK/Resultater",
         "http://www.bridgekrets.no/Kretser/NBF-Soer-Troendelag/Klubber/Fillan-BK/Resultater",
-        "http://www.bridgekrets.no/Kretser/NBF-Soer-Troendelag/Klubber/Hemne-BK/Resultater"
+        "http://www.bridgekrets.no/Kretser/NBF-Soer-Troendelag/Klubber/Hemne-BK/Resultater",
+        "http://bridgekrets.no/Kretser/NBF-Soer-Troendelag/Klubber/Oppdal-BK/Resultater",
+        "http://bridgekrets.no/Kretser/NBF-Soer-Troendelag/Klubber/Orkdal-BK/Resultater"
     ]
     return urls

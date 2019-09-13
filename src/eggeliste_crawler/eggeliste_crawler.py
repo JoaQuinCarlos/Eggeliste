@@ -9,7 +9,9 @@ invalid_links = [
     "http://bridgekrets.no/index.php/result/view/1745/2014-09-18?node=74510",
     "http://www.bridgekrets.no/result/view/1710/2014-12-22paaskecupen2015?node=63256",
     "http://www.bridgekrets.no/result/view/1710/2014-12-22?node=63256",
-    "http://www.bridgekrets.no/result/view/1710/2016-06-18?node=63256"
+    "http://www.bridgekrets.no/result/view/1710/2016-06-18?node=63256",
+    "http://bridgekrets.no/result/view/1780/2017-03-26?node=61771",
+    "http://bridgekrets.no/result/view/1780/orkdalopen-omgang1?node=61771"
 ]
 
 
@@ -58,11 +60,11 @@ conn = create_connection(database)
 # get_avg_score_for_pair(conn, "Per Mælen", "Trond Stafne")
 # get_avg_score_for_player(conn, "Arnfinn Helgemo")
 driver_path = "C:/Users/Joppe/Documents/chromedriver/chromedriver.exe"
-url = "http://www.bridgekrets.no/Kretser/NBF-Soer-Troendelag/Klubber/Hemne-BK/Resultater"
+url = "http://bridgekrets.no/Kretser/NBF-Soer-Troendelag/Klubber/Orkdal-BK/Resultater"
 #
-print_all_tournaments(conn)
-# print_all_tournaments_by_club(conn, "Berkåk BK")
-print_all_clubs(conn)
-# save_all_tournaments(url, driver_path, conn)
+# print_all_tournaments(conn)
+# print_all_tournaments_by_club(conn, "Orkdal BK")
+# print_all_clubs(conn)
+save_all_tournaments(url, driver_path, conn)
 # save_tournament_to_db("http://www.bridgekrets.no/result/view/1710/2014-05-13?node=63256", driver_path, conn, url)
 conn.close()
