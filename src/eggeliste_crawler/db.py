@@ -57,19 +57,80 @@ def persist_pair_stat(pair_stat, c, tournament_id):
         (pair_stat.name1, pair_stat.name2, pair_stat.club1, pair_stat.club2, pair_stat.points, pair_stat.score,
          tournament_id))
     pair_stat_id = c.lastrowid
-    for board in pair_stat.eggeliste:
-        persist_pair_board(board, c, pair_stat_id)
+    if pair_stat.eggeliste is not None:
+        for board in pair_stat.eggeliste:
+            persist_pair_board(board, c, pair_stat_id)
 
 
 def persist_pair_board(board, c, pair_stat_id):
-    c.execute(
-        "INSERT INTO pair_board(board_number, opponent_name1, opponent_name2, contract_level, contract_suit, "
-        "doubled, redoubled, declearer, tricks, lead_level, lead_suit, score, egge_enum, pair_score_id) "
-        "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (board.board_number, board.opponents[0], board.opponents[1], board.contract.contract_level,
-         board.contract.suit.name, int(board.contract.doubled), int(board.contract.redoubled), board.declearer,
-         board.tricks, board.lead_level, board.lead_suit.name, board.score, board.egge_enum.name, pair_stat_id))
+    if len(board.opponents) > 0:
+        c.execute(
+            "INSERT INTO pair_board(board_number, opponent_name1, opponent_name2, contract_level, contract_suit, "
+            "doubled, redoubled, declearer, tricks, lead_level, lead_suit, score, egge_enum, pair_score_id) "
+            "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (board.board_number, board.opponents[0], board.opponents[1], board.contract.contract_level,
+             board.contract.suit.name, int(board.contract.doubled), int(board.contract.redoubled), board.declearer,
+             board.tricks, board.lead_level, board.lead_suit.name, board.score, board.egge_enum.name, pair_stat_id))
 
+
+def get_tournaments(conn, club=None, scoring=None):
+    c = conn.cursor()
+    args = ()
+    query = "SELECT * FROM tournament t " \
+            "JOIN club c ON t.club_id = c.id "
+    if club is not None and scoring is None:
+        query += "WHERE c.name = (?)"
+        args = (club,)
+    if club is None and scoring is not None:
+        query += "WHERE t.tournament_type = (?) "
+        args = (scoring,)
+    if club is not None and scoring is not None:
+        query += "WHERE c.name = (?)" \
+                 "AND t.tournament_type = (?)"
+        args = (club, scoring)
+    if club is None and scoring is None:
+        c.execute(query)
+    else:
+        c.execute(query, args)
+    return c.fetchall()
+
+
+def get_pair_boards(conn, club=None, player1=None, player2=None):
+    c = conn.cursor()
+    args = ()
+    query = "SELECT * FROM pair_board pb " \
+            "JOIN pair_score ps " \
+            "ON pb.pair_score_id = ps.id " \
+            "JOIN tournament t " \
+            "ON ps.tournament_id = t.id " \
+            "JOIN club c " \
+            "ON t.club_id = c.id "
+    if club is None and player1 is None and player2 is None:
+        c.execute(query)
+        return c.fetchall()
+    if club is not None and player1 is None:
+        query += "WHERE c.name = (?)"
+        args = (club,)
+    if club is not None and player1 is not None and player2 is None:
+        query += "WHERE c.name = (?) " \
+                 "AND ps.player_name1 = (?) " \
+                 "OR ps.player_name2 = (?)"
+        args = (club, player1, player1)
+    if club is not None and player1 is not None and player2 is not None:
+        query += "WHERE c.name = (?) " \
+                 "AND ps.player_name1 in (?, ?) " \
+                 "AND ps.player_name2 in (?, ?) "
+        args = (club, player1, player2, player1, player2)
+    if club is None and player1 is not None and player2 is None:
+        query += "WHERE ps.player_name1 = (?) " \
+                 "OR ps.player_name2 = (?)"
+        args = (player1, player1)
+    if club is None and player1 is not None and player2 is not None:
+        query += "WHERE ps.player_name1 in (?, ?) " \
+                 "AND ps.player_name2 in (?, ?)"
+        args = (player1, player2, player1, player2)
+    c.execute(query, args)
+    return c.fetchall()
 
 
 def main():
@@ -87,5 +148,5 @@ def main():
     create_table(conn, sql_create_pair_board)
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

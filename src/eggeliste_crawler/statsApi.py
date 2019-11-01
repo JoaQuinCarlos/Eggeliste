@@ -80,40 +80,15 @@ def get_eggeliste_for_pair(conn, name1, name2):
     print("SW motspill:", (sw_mot_score / sw_mot))
 
 
-def get_all_pair_boards(conn):
-    c = conn.cursor()
-    c.execute("SELECT * FROM pair_board")
-    return c.fetchall()
-
-
 def get_all_tournaments(conn):
     c = conn.cursor()
     c.execute("SELECT * FROM tournament")
     return c.fetchall()
 
 
-def get_all_tournaments_by_club(conn, club):
-    c = conn.cursor()
-    c.execute("SELECT * FROM tournament t "
-              "JOIN club c ON t.club_id = c.id "
-              "WHERE c.name = (?);", (club,))
-    return c.fetchall()
-
-
 def get_all_clubs(conn):
     c = conn.cursor()
     c.execute("SELECT * FROM club")
-    return c.fetchall()
-
-
-def get_all_pair_boards_for_pairs(database, players):
-    conn = create_connection(database)
-    c = conn.cursor()
-    c.execute("SELECT * FROM pair_board pb "
-              "JOIN pair_score ps "
-              "ON pb.pair_score_id = ps.id "
-              "WHERE ps.player_name1 IN (?, ?) "
-              "AND ps.player_name2 IN (?, ?);", (players[0], players[1], players[0], players[1]))
     return c.fetchall()
 
 

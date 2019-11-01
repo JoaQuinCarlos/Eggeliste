@@ -23,6 +23,8 @@ def create_tournament(url, webdriver_path):
     title = get_title(driver)
     host = get_host(metadata)
     boards, rounds, pairs = get_boards_rounds_pairs(metadata)
+    if boards is None:
+        return None
     year, month, date = get_year_month_date(metadata)
     handicap_button = driver.find_elements_by_class_name("scratch-button")
     if len(handicap_button) > 0:
@@ -46,7 +48,7 @@ def get_host(metadata):
 
 def get_opponent_names(board, pair_number):
     hovers = board.find_elements_by_class_name("hover-title")
-    if int(str(hovers[0].get_attribute("innerText"))) == pair_number:
+    if str(hovers[0].get_attribute("innerText")) == str(pair_number):
         x = hovers[1].get_attribute("outerHTML")
     else:
         x = hovers[0].get_attribute("outerHTML")
@@ -57,6 +59,8 @@ def get_opponent_names(board, pair_number):
 def get_boards_rounds_pairs(metadata):
     innerText = str(metadata.find_elements_by_tag_name("div")[3].get_attribute("innerText"))
     numbers = [int(s) for s in innerText.replace(",", " ").replace(":", " ").split() if s.isdigit()]
+    if len(numbers) < 3:
+        return None, None, None
     return numbers[0], numbers[1], numbers[2]
 
 
@@ -101,16 +105,29 @@ def get_pair_scores(driver, tournament_type):
             if players[0] == '-' or players[0] == '':
                 scores.append(PairScore("SITOUT", "SITOUT", "SITOUT", "SITOUT", 0, 0))
             else:
-                scores.append(PairScore(players[0], players[1], clubs[0], clubs[0], score, percent))
+                if len(players) == 2:
+                    scores.append(PairScore(players[0], players[1], clubs[0], clubs[0], score, percent))
+                else:
+                    scores.append(PairScore(players[0], "", clubs[0], clubs[0], score, percent))
+
         else:
             scores.append(PairScore(players[0], players[1], clubs[0], clubs[1], score, percent))
 
-    if tournament_type == TournamentType.SINGLE:
-        return scores  # Returning early to avoid lots of work regarding single tournaments
+    if tournament_type == TournamentType.SINGLE or scores[-1].points > 0:
+        # Returning early to avoid lots of work regarding single tournaments
+        # Also avoiding tournaments scored old-fashioned where all scores are positive.
+        return scores
     pair_details = driver.find_elements_by_class_name("pairdetail")
     count = 0
     for pair in pair_details:
-        pair_number = int(str(expandables[count].find_elements_by_tag_name("td")[1].get_attribute("innerText")))
+        pair_number = str(expandables[count].find_elements_by_tag_name("td")[1].get_attribute("innerText"))
+        try:
+            pair_number = int(pair_number)
+        except ValueError:
+            tot = 0
+            for char in pair_number:
+                tot += ord(char)
+            pair_number = tot
         boards = []
         board_list = pair.find_elements_by_tag_name("tr")[2:-1]
         t1 = time.time()
