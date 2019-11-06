@@ -80,31 +80,27 @@ def print_all_boards(conn, club=None, player1=None, player2=None):
     print("Total number of boards: ", len(boards))
 
 
-database = "C:\\Users\Joppe\PycharmProjects\Eggeliste\src\db\db.db"
+# database = "C:\\Users\Joppe\PycharmProjects\Eggeliste\src\db\db.db"
+database = "C:\\Users\Joaquin\PycharmProjects\Eggeliste\src\db\db.db"
 conn = create_connection(database)
 
-# boards = get_pair_boards(conn, player1="Arnt Ola Løhre")
-#
-# d = dict()
-# for board in boards:
-#     if board[16] in d:
-#         d[board[16]] += 1
-#     else:
-#         d[board[16]] = 1
-#     if board[17] in d:
-#         d[board[17]] += 1
-#     else:
-#         d[board[17]] = 1
-#
-# for player in d:
-#     print("Makker", player, "\nAntall spill: ", d[player])
+boards = get_pair_boards(conn)
+get_pair_against_pair(boards, "Joakim Sæther", "Arnt Ola Løhre", "Ola Bjerkan", "Arnfinn Bolland")
+get_player_against_player(boards, "Joakim Sæther", "Per Mælen")
+get_player_against_player(boards, "Joakim Sæther", "Trond Stafne")
+get_player_against_player(boards, "Joakim Sæther", "Torbjørn Børmark")
+get_player_against_player(boards, "Joakim Sæther", "Odd Kjønsvik")
+get_player_against_player(boards, "Arnt Ola Løhre", "Per Mælen")
+get_player_against_player(boards, "Arnt Ola Løhre", "Trond Stafne")
+get_player_against_player(boards, "Arnt Ola Løhre", "Torbjørn Børmark")
+get_player_against_player(boards, "Arnt Ola Løhre", "Odd Kjønsvik")
 
-driver_path = "C:/Users/Joppe/Documents/chromedriver/chromedriver.exe"
-url = "http://bridgekrets.no/index.php/Kretser/NBF-Soer-Troendelag/Klubber/Orkdal-BK/Resultater"
+# driver_path = "C:/Users/Joppe/Documents/chromedriver/chromedriver.exe"
+# url = "http://bridgekrets.no/index.php/Kretser/NBF-Soer-Troendelag/Klubber/Orkdal-BK/Resultater"
 # print_all_boards(conn, player1="Arnt Ola Løhre")
 
 # print_all_tournaments(conn)
 # print_all_clubs(conn)
-save_all_tournaments(url, driver_path, conn)
+# save_all_tournaments(url, driver_path, conn)
 # save_tournament_to_db("http://www.bridgekrets.no/result/view/1611/2019-03-18?node=114703", driver_path, conn, url)
 conn.close()
