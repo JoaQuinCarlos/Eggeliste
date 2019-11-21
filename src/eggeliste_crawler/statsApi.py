@@ -1,5 +1,7 @@
 import math as ma
 from db import create_connection
+from ..eggeliste_crawler.enums.DeclearerEnum import Declearer
+import operator
 
 
 def get_avg_score_for_pair(conn, name1, name2):
@@ -188,6 +190,48 @@ def get_player_against_player(boards, player1, player2):
         print("Average score:", score / board_count)
 
 
+def get_avg_num_down_for_player(boards, player1):
+    board_count, number_of_downs = 0, 0
+    for board in boards:
+        if (board[16] == player1 or board[17] == player1) and (board[13] == 'NEFORING' or board[13] == 'SWFORING'):
+            board_count += 1
+            number_of_downs += number_of_down(board)
+    print("Average downs per board for", player1, ":", number_of_downs / board_count)
+
+
+def get_avg_num_down_for_pair(boards, player1, player2):
+    board_count, number_of_downs = 0, 0
+    for board in boards:
+        if (board[16] == player1 or board[17] == player1) and (board[16] == player2 or board[17] == player2) and (board[13] == 'NEFORING' or board[13] == 'SWFORING'):
+            board_count += 1
+            number_of_downs += number_of_down(board)
+    print("Average downs per board for", player1, "-", player2, ":", number_of_downs / board_count)
+
+
+def get_down_stats_for_all_players(boards):
+    player_dict = {}
+    for board in boards:
+        downs = number_of_down(board)
+        if board[13] == 'NEFORING' or board[13] == 'SWFORING':
+            if board[16] in player_dict:
+                player_dict[board[16]][0] += 1
+                player_dict[board[16]][1] += downs
+            else:
+                player_dict[board[16]] = [1, downs]
+            if board[17] in player_dict:
+                player_dict[board[17]][0] += 1
+                player_dict[board[17]][1] += downs
+            else:
+                player_dict[board[17]] = [1, downs]
+    reworked_dict = {}
+    for player in player_dict:
+        if player_dict[player][1] > 100:
+            reworked_dict[player] = player_dict[player][1] / player_dict[player][0]
+    reworked_dict = sorted(reworked_dict, key=reworked_dict.get)
+    for player in reworked_dict:
+        print("Player:", player, "Average number of downs:", player_dict[player][1] / player_dict[player][0])
+
+
 def get_all_tournaments(conn):
     c = conn.cursor()
     c.execute("SELECT * FROM tournament")
@@ -204,3 +248,12 @@ def score_to_percent(score, pairs):
     top = ma.floor((pairs - 2) / 2) * 2
     score = (top / 2) + score
     return 100 * (score / top)
+
+
+def number_of_down(board):
+    contract_level = int(board[4])
+    num_tricks = int(board[9])
+    num_downs = contract_level + 6 - num_tricks
+    if num_downs > 0:
+        return num_downs
+    return 0

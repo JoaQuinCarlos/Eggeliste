@@ -80,20 +80,12 @@ def print_all_boards(conn, club=None, player1=None, player2=None):
     print("Total number of boards: ", len(boards))
 
 
-# database = "C:\\Users\Joppe\PycharmProjects\Eggeliste\src\db\db.db"
-database = "C:\\Users\Joaquin\PycharmProjects\Eggeliste\src\db\db.db"
+database = "C:\\Users\Joppe\PycharmProjects\Eggeliste\src\db\db.db"
+# database = "C:\\Users\Joaquin\PycharmProjects\Eggeliste\src\db\db.db"
 conn = create_connection(database)
 
 boards = get_pair_boards(conn)
-get_pair_against_pair(boards, "Joakim Sæther", "Arnt Ola Løhre", "Ola Bjerkan", "Arnfinn Bolland")
-get_player_against_player(boards, "Joakim Sæther", "Per Mælen")
-get_player_against_player(boards, "Joakim Sæther", "Trond Stafne")
-get_player_against_player(boards, "Joakim Sæther", "Torbjørn Børmark")
-get_player_against_player(boards, "Joakim Sæther", "Odd Kjønsvik")
-get_player_against_player(boards, "Arnt Ola Løhre", "Per Mælen")
-get_player_against_player(boards, "Arnt Ola Løhre", "Trond Stafne")
-get_player_against_player(boards, "Arnt Ola Løhre", "Torbjørn Børmark")
-get_player_against_player(boards, "Arnt Ola Løhre", "Odd Kjønsvik")
+get_down_stats_for_all_players(boards)
 
 # driver_path = "C:/Users/Joppe/Documents/chromedriver/chromedriver.exe"
 # url = "http://bridgekrets.no/index.php/Kretser/NBF-Soer-Troendelag/Klubber/Orkdal-BK/Resultater"
