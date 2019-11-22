@@ -85,7 +85,33 @@ database = "C:\\Users\Joppe\PycharmProjects\Eggeliste\src\db\db.db"
 conn = create_connection(database)
 
 boards = get_pair_boards(conn)
-get_down_stats_for_all_players(boards)
+get_slam_stats(boards, player1="Joakim Sæther")
+get_slam_stats(boards, player1="Arnt Ola Løhre")
+get_slam_stats(boards, player1="Svein Ingar Sæther")
+get_slam_stats(boards, player1="Kolbjørn Ler")
+get_slam_stats(boards, player1="Joakim Sæther", player2="Arnt Ola Løhre")
+# get_down_stats(boards=boards,
+#                player_list=
+#                ["Per Mælen",
+#                 "Svein Ingar Sæther",
+#                 "Asgeir Langen",
+#                 "Joakim Sæther",
+#                 "Arnt Ola Løhre",
+#                 "Kaido Poder",
+#                 "Ulf Hagestuen",
+#                 "Jørund Folde",
+#                 "Ove Grøtheim",
+#                 "Johan Blekesmark",
+#                 "John Andreassen",
+#                 "Gerd Rokne",
+#                 "Arne Sæther",
+#                 "Brage Sæther",
+#                 "Anne Solstad",
+#                 "Magnar Kolstad",
+#                 "Kjell Ove Helmersen",
+#                 "Tore Berg",
+#                 "Randulf Aunan"
+#                 ])
 
 # driver_path = "C:/Users/Joppe/Documents/chromedriver/chromedriver.exe"
 # url = "http://bridgekrets.no/index.php/Kretser/NBF-Soer-Troendelag/Klubber/Orkdal-BK/Resultater"
