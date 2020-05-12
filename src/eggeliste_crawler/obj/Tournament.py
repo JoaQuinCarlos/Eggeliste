@@ -1,15 +1,8 @@
-from selenium import webdriver
-
-from src.eggeliste_crawler.obj.Contract import Contract
-from src.eggeliste_crawler.obj.PairBoard import PairBoard
-from src.eggeliste_crawler.obj.PairScore import PairScore
-from src.eggeliste_crawler.enums.SuitEnum import Suit
-from src.eggeliste_crawler.enums.DeclearerEnum import Declearer
-
-
 class Tournament:
 
-    def __init__(self, title, host, boards, rounds, pairs, year, month, date, pair_stats):
+    def __init__(self, url, type, title, host, boards, rounds, pairs, year, month, date, pair_stats):
+        self.url = url
+        self.type = type
         self.title = title
         self.host = host
         self.boards = boards

@@ -7,4 +7,5 @@ class Suit(Enum):
     HEARTS = 2
     SPADES = 3
     NOTRUMP = 4
+    NONE = 5
 
