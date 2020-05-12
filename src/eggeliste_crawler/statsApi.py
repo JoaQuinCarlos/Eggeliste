@@ -1,8 +1,5 @@
 import math as ma
-from db import create_connection
-from ..eggeliste_crawler.enums.DeclearerEnum import Declearer
 import operator
-
 
 def get_avg_score_for_pair(conn, name1, name2):
     c = conn.cursor()
@@ -37,6 +34,7 @@ def get_avg_score_for_player(conn, name1):
         if r[16] == 'MP':
             num_boards += r[14]
             tot += r[14] * r[6]
+
     print("Number of boards: ", num_boards)
     print("Average score: ", tot / num_boards)
 
@@ -261,6 +259,13 @@ def get_down_stats(boards, player1=None, player2=None, player_list=None):
                           player_dict[player][1] / player_dict[player][0])
 
 
+'''
+Getting the slam stats for the following person(s):
+- A player if only the player1-argument is given.
+- A pair if both the player1-argument and the player2-argument is given.
+- All players in the database if no parameters are supplied. (Implementation not complete)
+- A list of players if only the player_list-parameter is supplied. (Implementation not complete)
+'''
 def get_slam_stats(boards, player1=None, player2=None, player_list=None):
     small_slam_fail, small_slam_made, board_count, grand_fail, grand_made = 0, 0, 0, 0, 0
     if player1 is not None and player2 is None:
@@ -306,6 +311,7 @@ def get_slam_stats(boards, player1=None, player2=None, player_list=None):
         print("Grands made:", 100 * grand_made / (grand_fail + grand_made), "%", "(", grand_made + grand_fail, "grands in total)")
 
     elif player1 is None and player2 is None:
+        raise NotImplementedError("This functionality is not fully implemented yet.")
         player_dict = {}
         for board in boards:
             small_fail = int(board[4]) == 6 and number_of_down(board) > 0

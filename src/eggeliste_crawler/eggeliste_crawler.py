@@ -3,6 +3,7 @@ from src.eggeliste_crawler.db import *
 from src.eggeliste_crawler.URL_supplier import *
 from src.eggeliste_crawler.enums.TournamentTypeEnum import *
 from src.eggeliste_crawler.statsApi import *
+from src.eggeliste_crawler.enums.DeclearerEnum import *
 
 invalid_links = [
     "http://www.bridgekrets.no/result/view/1755/2012-08-06?node=63169",
@@ -42,7 +43,7 @@ def save_tournament_to_db(url, driver_path, conn, main_url):
             persist_tournament(conn, tour, main_url)
 
 
-def save_all_tournaments(url, driver_path, conn):
+def save_all_tournaments(driver_path, conn):
     main_links = main_urls()
     for main_url in main_links:
         links = get_links(main_url, driver_path)
@@ -84,41 +85,27 @@ database = "C:\\Users\Joppe\PycharmProjects\Eggeliste\src\db\db.db"
 # database = "C:\\Users\Joaquin\PycharmProjects\Eggeliste\src\db\db.db"
 conn = create_connection(database)
 
-boards = get_pair_boards(conn)
-get_slam_stats(boards, player1="Joakim Sæther")
-get_slam_stats(boards, player1="Arnt Ola Løhre")
-get_slam_stats(boards, player1="Svein Ingar Sæther")
-get_slam_stats(boards, player1="Kolbjørn Ler")
-get_slam_stats(boards, player1="Joakim Sæther", player2="Arnt Ola Løhre")
-# get_down_stats(boards=boards,
-#                player_list=
-#                ["Per Mælen",
-#                 "Svein Ingar Sæther",
-#                 "Asgeir Langen",
-#                 "Joakim Sæther",
-#                 "Arnt Ola Løhre",
-#                 "Kaido Poder",
-#                 "Ulf Hagestuen",
-#                 "Jørund Folde",
-#                 "Ove Grøtheim",
-#                 "Johan Blekesmark",
-#                 "John Andreassen",
-#                 "Gerd Rokne",
-#                 "Arne Sæther",
-#                 "Brage Sæther",
-#                 "Anne Solstad",
-#                 "Magnar Kolstad",
-#                 "Kjell Ove Helmersen",
-#                 "Tore Berg",
-#                 "Randulf Aunan"
-#                 ])
+boards = get_pair_boards(conn, player1="Edd Robert Stenbro")
 
-# driver_path = "C:/Users/Joppe/Documents/chromedriver/chromedriver.exe"
-# url = "http://bridgekrets.no/index.php/Kretser/NBF-Soer-Troendelag/Klubber/Orkdal-BK/Resultater"
-# print_all_boards(conn, player1="Arnt Ola Løhre")
+
+dec = 0
+mot = 0
+for board in boards:
+    if board[13] == "NEFORING" or board[13] == "SWFORING":
+        dec += 1
+    elif board[13] == "NEUTSPILL" or board[13] == "SWUTSPILL":
+        mot += 1
+    else:
+        print(board[13])
+
+print(dec)
+print(mot)
+print(float(dec) / float(dec + mot))
+
+driver_path = "C:/Users/Joppe/Documents/chromedriver/chromedriver.exe"
 
 # print_all_tournaments(conn)
 # print_all_clubs(conn)
-# save_all_tournaments(url, driver_path, conn)
+# save_all_tournaments(driver_path, conn)
 # save_tournament_to_db("http://www.bridgekrets.no/result/view/1611/2019-03-18?node=114703", driver_path, conn, url)
 conn.close()

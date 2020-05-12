@@ -147,6 +147,7 @@ def get_board(board, pair_number):
 
     board_number = int(board.find_elements_by_class_name("board-no")[0].get_attribute("data-boardno"))
     contract = get_contract(names[0])
+    opponents = get_opponent_names(board=board, pair_number=pair_number)
     declearer = tds[4].get_attribute("innerText")
     score = float(str(numbers[1].get_attribute("innerText")).replace(",", "."))
     if contract.contract_level == 0:
@@ -159,7 +160,6 @@ def get_board(board, pair_number):
         lead_level = 0
         lead_suit = Suit.NONE
 
-    opponents = get_opponent_names(board=board, pair_number=pair_number)
     tricks = int(tds[5].get_attribute("innerText"))
     egge_enum = get_declearer(numbers[-4:])
     return PairBoard(board_number=board_number, opponents=opponents, contract=contract, declearer=declearer, tricks=tricks, lead_level=lead_level, lead_suit=lead_suit, score=score,
@@ -181,8 +181,12 @@ def get_contract(contractElement):
     elif 'X' in innerText:
         doubled = True
         innerText = innerText[0]
-    contract_level = [int(s) for s in innerText.split() if s.isdigit()][0]
-    return Contract(contract_level, contract_suit, doubled, redoubled)
+    ints = [int(s) for s in innerText.split() if s.isdigit()]
+    if len(ints) > 0:
+        contract_level = [int(s) for s in innerText.split() if s.isdigit()][0]
+        return Contract(contract_level, contract_suit, doubled, redoubled)
+    else:
+        return None
 
 
 def get_suit(board):
